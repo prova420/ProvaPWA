@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestione Magazzino Avanzata</title>
+    
+    <!-- Manifest PWA -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Icona per iOS -->
+    <link rel="apple-touch-icon" href="icons/icon-152x152.png">
+    
+    <!-- Meta per PWA -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#3498db">
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Tutti i tuoi stili CSS esistenti qui */
+        :root {
+            --primary: #2c3e50;
+            --secondary: #3498db;
+            --success: #27ae60;
+            --warning: #f39c12;
+            --danger: #e74c3c;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --card-bg: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #e4e7eb 100%);
+            --bg-color: #f5f7fa;
+            --text-color: #333;
+            --input-bg: #fafafa;
+            --input-text: #333;
+        }
+
+        [data-theme="dark"] {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --bg-color: #1a1a1a;
+            --text-color: #f0f0f0;
+            --card-bg: #2d2d2d;
+            --light: #444;
+            --dark: #f0f0f0;
+            --bg-gradient: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            --input-bg: #ffffff;
+            --input-text: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 25px;
+            background: linear-gradient(135deg, var(--primary) 0%, #1a2530 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ff9a9e, #fad0c4);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--secondary), var(--success));
+        }
+
+        .card-header {
+            color: var(--primary);
+            padding-bottom: 18px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .card-header h2 {
+            font-size: 1.6rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header h2 i {
+            color: var(--secondary);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            text-align: center;
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+
+        .item-row {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 12px 0;
+            border-left: 4px solid var(--secondary);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        /* STILI PER BASSA DISPONIBILITÀ */
+        .item-row.low-stock {
+            background-color: rgba(231, 76, 60, 0.1) !important;
+            border-left: 4px solid var(--danger) !important;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
+        }
+
+        .item-row.low-stock .alert-icon {
+            display: inline-block !important;
+            color: var(--danger);
+            margin-right: 5px;
+        }
+
+        .item-row.low-stock .quantity-container {
+            background-color: rgba(231, 76, 60, 0.3) !important;
+            border-radius: 8px;
+            padding: 10px;
+            margin: -10px -10px -10px 0;
+        }
+
+        .item-row > div {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .item-row .actions {
+            flex: 0 0 auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .alert-icon {
+            display: none;
+        }
+
+        .input-group {
+            margin-bottom: 22px;
+            position: relative;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+            background: var(--input-bg);
+            color: var(--input-text);
+        }
+
+        input:focus, select:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(52, 152, 219, 0.15);
+            background: var(--input-bg);
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 25px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .category-header h3 {
+            font-size: 1.4rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--light);
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            cursor: pointer;
+            background: #f0f4f8;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            transition: all 0.3s;
+            flex-grow: 1;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            position: relative;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid var(--secondary);
+            background: white;
+        }
+
+        .tab-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .tab:hover .tab-remove {
+            opacity: 1;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .warehouse-summary {
+            background: linear-gradient(135deg, var(--primary) 0%, #1a2530 100%);
+            color: white;
+            padding: 35px;
+            border-radius: 12px;
+            margin: 20px 0;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .warehouse-summary h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.9rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 18px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            font-size: 17px;
+        }
+
+        .summary-item:last-child {
+            border-bottom: none;
+        }
+
+        .summary-value {
+            font-weight: 700;
+            font-size: 19px;
+        }
+
+        .positive {
+            color: var(--success);
+        }
+
+        .negative {
+            color: var(--danger);
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: var(--dark);
+            font-size: 0.9rem;
+            margin-top: auto;
+        }
+
+        .add-item-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        .floating-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--success);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            z-index: 100;
+            transition: transform 0.3s;
+        }
+
+        .floating-btn:hover {
+            transform: translateY(-5px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: var(--secondary);
+            margin-bottom: 15px;
+        }
+
+        .sync-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 10px 0;
+            z-index: 1;
+        }
+
+        .modal-header h2 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            margin: 0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--dark);
+            padding: 5px;
+        }
+
+        .sync-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .sync-option {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .sync-option h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .sync-option p {
+            margin: 5px 0;
+            font-size: 0.9rem;
+            color: var(--dark);
+        }
+
+        .sync-option textarea {
+            width: 100%;
+            height: 120px;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            resize: none;
+        }
+
+        .sync-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .sync-buttons .btn {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--success);
+            color: white;
+            padding: 15px 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: none;
+            z-index: 1000;
+            transition: opacity 0.3s;
+        }
+
+        .notification.error {
+            background: var(--danger);
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border-left: 4px solid var(--secondary);
+            position: relative;
+        }
+
+        .summary-card h3 {
+            margin-top: 0;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .summary-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .stat-value {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .manage-btn {
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+        }
+
+        .filter-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .history-entry {
+            padding: 8px 0;
+            border-bottom: 1px solid var(--light);
+        }
+
+        .history-timestamp {
+            color: var(--secondary);
+            font-size: 0.8rem;
+        }
+
+        .alert-threshold {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .alert-threshold input {
+            width: 60px;
+            padding: 8px;
+        }
+
+        /* Nuovi stili per l'ordinamento */
+        .sort-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .sort-btn {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            background: var(--light);
+            color: var(--dark);
+        }
+        
+        .sort-btn.active {
+            background: var(--secondary);
+            color: white;
+        }
+        
+        .sort-btn i {
+            transition: transform 0.3s;
+        }
+        
+        .sort-btn.asc i {
+            transform: rotate(0deg);
+        }
+        
+        .sort-btn.desc i {
+            transform: rotate(180deg);
+        }
+
+        .remove-warehouse-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(231, 76, 60, 0.1);
+            border: none;
+            color: var(--danger);
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+
+        .remove-warehouse-btn:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        /* Stile per pulsante installazione PWA */
+        .install-btn {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            padding: 12px 20px;
+            background: var(--primary);
+            color: white;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 99;
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .item-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .item-row .actions {
+                align-self: flex-end;
+                margin-top: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+            
+            .tab {
+                padding: 10px;
+            }
+            
+            .sync-buttons {
+                flex-direction: column;
+            }
+            
+            .sync-buttons .btn {
+                width: 100%;
+            }
+            
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            header h1 {
+                font-size: 1.8rem;
+                flex-direction: column;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .sort-buttons {
+                flex-direction: column;
+            }
+            
+            .install-btn {
+                bottom: 80px;
+                right: 15px;
+                padding: 10px 15px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Pulsante per installazione PWA -->
+    <button id="installBtn" class="install-btn">
+        <i class="fas fa-download"></i> Installa App
+    </button>
+
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-warehouse"></i> Gestione Magazzino</h1>
+            <button id="theme-toggle" class="btn btn-sm" style="position: absolute; top: 20px; right: 20px;">
+                <i class="fas fa-moon"></i> Dark Mode
+            </button>
+            <div class="btn-group" style="margin-top: 15px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
+                <button class="btn btn-success" onclick="addWarehouse()">
+                    <i class="fas fa-plus"></i> Nuovo Magazzino
+                </button>
+                <button class="btn btn-warning" onclick="openSyncModal()">
+                    <i class="fas fa-sync-alt"></i> Sincronizza
+                </button>
+                <button class="btn btn-primary" id="save-btn" onclick="saveToAirtable()">
+                    <i class="fas fa-save"></i> Salva
+                </button>
+                <button class="btn btn-primary" onclick="toggleAirtableConfig()">
+                    <i class="fas fa-cloud"></i> Configura
+                </button>
+            </div>
+        </header>
+        
+        <div class="tabs" id="warehouse-tabs">
+            <!-- Tabs verranno generati dinamicamente -->
+        </div>
+        
+        <div class="tab-content active" id="warehouse-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-edit"></i> Inventario Magazzino: <span id="current-warehouse-name">Magazzino 1</span></h2>
+                    <input type="text" id="warehouse-name-input" value="Magazzino 1" style="display: none; width: 200px; padding: 8px;">
+                    <button class="btn btn-warning btn-sm" id="rename-btn" onclick="toggleRename()">
+                        <i class="fas fa-edit"></i> Rinomina
+                    </button>
+                </div>
+                
+                <!-- Barra di ricerca e filtri -->
+                <div class="search-bar">
+                    <input type="text" id="search-input" placeholder="Cerca articoli...">
+                    <div class="filter-buttons">
+                        <button class="btn btn-sm" onclick="filterItems('all')">Tutti</button>
+                        <button class="btn btn-sm btn-warning" onclick="filterItems('low')">Esaurimento</button>
+                    </div>
+                </div>
+                
+                <!-- Sezioni categorie -->
+                <div id="category-sections">
+                    <!-- Categorie verranno generate dinamicamente -->
+                </div>
+                
+                <button class="btn btn-primary add-item-btn" onclick="showAddCategoryModal()">
+                    <i class="fas fa-plus"></i> Aggiungi Categoria
+                </button>
+                
+                <div class="warehouse-summary">
+                    <h2><i class="fas fa-chart-pie"></i> Riepilogo Magazzino</h2>
+                    
+                    <div class="summary-item">
+                        <span><i class="fas fa-boxes"></i> Totale Articoli:</span>
+                        <span class="summary-value" id="total-items">0</span>
+                    </div>
+                    
+                    <div class="summary-item">
+                        <span><i class="fas fa-exclamation-triangle"></i> Articoli in Esaurimento:</span>
+                        <span class="summary-value negative" id="low-stock">0</span>
+                    </div>
+                </div>
+                
+                <!-- Storico modifiche -->
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-header" onclick="toggleHistory()" style="cursor: pointer;">
+                        <h2><i class="fas fa-history"></i> Storico Modifiche</h2>
+                        <i class="fas fa-chevron-down" id="history-chevron"></i>
+                    </div>
+                    <div class="card-body" id="history-content" style="display: none;">
+                        <ul id="history-list" style="list-style: none; padding: 0;"></ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="summary-content">
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fas fa-clipboard-list"></i> Panoramica Magazzini</h2>
+                </div>
+                
+                <div class="summary-grid" id="warehouse-summary">
+                    <!-- Riepilogo magazzini verrà generato dinamicamente -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Sezione configurazione Airtable -->
+        <div class="card" id="airtable-config" style="display: none; margin-top: 20px;">
+            <div class="card-header">
+                <h2><i class="fas fa-cloud"></i> Configurazione Airtable</h2>
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-key"></i> API Key</label>
+                <input type="password" id="airtable-api-key" placeholder="Inserisci la tua API Key di Airtable">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-database"></i> Base ID</label>
+                <input type="text" id="airtable-base-id" placeholder="Inserisci Base ID">
+            </div>
+            <div class="input-group">
+                <label><i class="fas fa-table"></i> Nome Tabella</label>
+                <input type="text" id="airtable-table-name" placeholder="Inserisci nome tabella" value="Magazzino">
+            </div>
+            <button class="btn btn-success" onclick="saveAirtableConfig()">
+                <i class="fas fa-save"></i> Salva Configurazione
+            </button>
+        </div>
+        
+        <footer>
+            <p>© 2023 Gestione Magazzino | Strumento sviluppato per la gestione avanzata degli inventari</p>
+            <p>Dati salvati su Airtable</p>
+        </footer>
+    </div>
+
+    <!-- Modal per la sincronizzazione -->
+    <div class="sync-modal" id="sync-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-sync-alt"></i> Sincronizza Dati</h2>
+                <button class="close-modal" onclick="closeSyncModal()">&times;</button>
+            </div>
+            
+            <div class="sync-options">
+                <div class="sync-option">
+                    <h3>Esporta Dati</h3>
+                    <p>Esporta tutti i dati del magazzino in un file JSON per condividerli con altri dispositivi.</p>
+                    <textarea id="export-data" readonly placeholder="Dati esportati appariranno qui..."></textarea>
+                    <div class="sync-buttons">
+                        <button class="btn btn-primary" onclick="copyToClipboard()">
+                            <i class="fas fa-copy"></i> Copia
+                        </button>
+                        <button class="btn btn-success" onclick="downloadData()">
+                            <i class="fas fa-download"></i> Scarica
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="sync-option">
+                    <h3>Importa Dati</h3>
+                    <p>Importa dati da un file JSON o incolla i dati copiati per sincronizzare questo dispositivo.</p>
+                    <textarea id="import-data" placeholder="Incolla qui i dati JSON o carica un file..."></textarea>
+                    <input type="file" id="import-file" accept=".json" style="display: none;">
+                    <div class="sync-buttons">
+                        <button class="btn btn-warning" onclick="document.getElementById('import-file').click()">
+                            <i class="fas fa-upload"></i> Carica File
+                        </button>
+                        <button class="btn btn-primary" onclick="importFromText()">
+                            <i class="fas fa-paste"></i> Importa
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification">
+        Operazione completata con successo!
+    </div>
+
+    <div class="floating-btn" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Script principale dell'applicazione -->
+    <script>
+        // Dati magazzini
+        let warehouses = {};
+        let currentWarehouse = "";
+        let isRenaming = false;
+        let history = [];
+        
+        // Stato per l'ordinamento
+        let sortState = {};
+        let currentFilter = 'all';
+        
+        // Configurazione Airtable
+        let airtableConfig = {
+            apiKey: '',
+            baseId: '',
+            tableName: 'Magazzino'
+        };
+        
+        // Funzione per generare ID univoco
+        function generateId() {
+            return 'id-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+        }
+        
+        // ========== FUNZIONI PRINCIPALI ========== //
+        
+        function loadWarehouseState() {
+            // Non carichiamo più da localStorage, ma da Airtable
+            // Carichiamo solo la configurazione Airtable
+            loadAirtableConfig();
+            
+            // I dati verranno caricati da Airtable durante l'inizializzazione
+        }
+        
+        function addWarehouse() {
+            const newName = prompt("Inserisci il nome del nuovo magazzino:", `Magazzino ${Object.keys(warehouses).length + 1}`);
+            if (newName && newName.trim() !== "") {
+                warehouses[newName] = {
+                    "cibo": [],
+                    "pulizie": []
+                };
+                addHistoryEntry(`Creato nuovo magazzino: ${newName}`);
+                showNotification('Modifica effettuata! Ricorda di salvare');
+                renderWarehouseTabs();
+                switchWarehouse(newName);
+            }
+        }
+        
+        function removeWarehouse(name) {
+            if (Object.keys(warehouses).length <= 1) {
+                showNotification("Deve esserci almeno un magazzino!", true);
+                return;
+            }
+            
+            if (!confirm(`Sei sicuro di voler eliminare il magazzino "${name}"? Tutti i dati andranno persi.`)) {
+                return;
+            }
+            
+            // Se stiamo visualizzando il magazzino che stiamo per eliminare, dobbiamo cambiare magazzino
+            const wasCurrent = currentWarehouse === name;
+            
+            delete warehouses[name];
+            
+            addHistoryEntry(`Eliminato magazzino: ${name}`);
+            
+            if (wasCurrent) {
+                // Passa al primo magazzino disponibile
+                const firstWarehouse = Object.keys(warehouses)[0];
+                switchWarehouse(firstWarehouse);
+            }
+            
+            showNotification('Modifica effettuata! Ricorda di salvare');
+            renderWarehouseTabs();
+            renderWarehouseSummary();
+        }
+        
+        function switchWarehouse(name) {
+            currentWarehouse = name;
+            
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            const tab = document.querySelector(`.tab[data-warehouse="${name}"]`);
+            if (tab) {
+                tab.classList.add('active');
+            }
+            
+            document.getElementById('warehouse-content').classList.add('active');
+            document.getElementById('current-warehouse-name').textContent = name;
+            
+            renderCategories();
+            updateSummary();
+            renderHistory();
+        }
+        
+        // ========== GESTIONE ARTICOLI ========== //
+        
+        function addItem(category) {
+            warehouses[currentWarehouse][category].push({ 
+                id: generateId(),
+                nome: "", 
+                quantita: 0,
+                alertThreshold: 5
+            });
+            addHistoryEntry(`Aggiunto nuovo articolo in ${category}`);
+            showNotification('Modifica effettuata! Ricorda di salvare');
+            renderCategories();
+        }
+        
+        function removeItem(category, itemId) {
+            const categoryItems = warehouses[currentWarehouse][category];
+            const index = categoryItems.findIndex(item => item.id === itemId);
+            
+            if (index !== -1) {
+                const itemName = categoryItems[index].nome || "Articolo senza nome";
+                categoryItems.splice(index, 1);
+                addHistoryEntry(`Rimosso articolo ${itemName} da ${category}`);
+                showNotification('Modifica effettuata! Ricorda di salvare');
+                renderCategories();
+                updateSummary();
+            }
+        }
+        
+        function updateItem(category, itemId, field, value) {
+            const categoryItems = warehouses[currentWarehouse][category];
+            const index = categoryItems.findIndex(item => item.id === itemId);
+            
+            if (index === -1) return;
+            
+            const oldValue = categoryItems[index][field];
+            
+            if (field === 'quantita' || field === 'alertThreshold') {
+                value = parseInt(value) || 0;
+            }
+            
+            categoryItems[index][field] = value;
+            
+            // Controlla allerta se la quantità è stata modificata
+            if (field === 'quantita') {
+                const threshold = categoryItems[index].alertThreshold || 5;
+                if (value <= threshold) {
+                    showNotification(`ATTENZIONE: ${categoryItems[index].nome} sotto il livello minimo (${threshold})!`, true);
+                }
+            }
+            
+            // Ricalcola lo stato di bassa disponibilità
+            renderCategories();
+            updateSummary();
+            
+            if (oldValue !== value) {
+                const itemName = categoryItems[index].nome || "Articolo senza nome";
+                addHistoryEntry(`Modificato ${field} di ${itemName} da ${oldValue} a ${value} in ${category}`);
+            }
+        }
+        
+        // ========== GESTIONE CATEGORIE ========== //
+        
+        function renderCategories() {
+            const container = document.getElementById('category-sections');
+            container.innerHTML = '';
+            
+            Object.keys(warehouses[currentWarehouse]).forEach(category => {
+                const section = document.createElement('div');
+                
+                section.innerHTML = `
+                    <div class="category-header">
+                        <h3><i class="fas fa-folder"></i> ${category}</h3>
+                        <div>
+                            <button class="btn btn-success btn-sm" onclick="addItem('${category}')">
+                                <i class="fas fa-plus"></i> Aggiungi Articolo
+                            </button>
+                            ${category !== 'cibo' && category !== 'pulizie' ? 
+                                `<button class="btn btn-danger btn-sm" onclick="removeCategory('${category}')">
+                                    <i class="fas fa-trash"></i>
+                                </button>` : ''
+                            }
+                        </div>
+                    </div>
+                    <div class="sort-buttons">
+                        <button class="sort-btn ${getSortClass(category, 'nome', 'asc')}" onclick="sortItems('${category}', 'nome', 'asc')">
+                            <i class="fas fa-sort-alpha-down"></i> Nome (A-Z)
+                        </button>
+                        <button class="sort-btn ${getSortClass(category, 'nome', 'desc')}" onclick="sortItems('${category}', 'nome', 'desc')">
+                            <i class="fas fa-sort-alpha-up"></i> Nome (Z-A)
+                        </button>
+                        <button class="sort-btn ${getSortClass(category, 'quantita', 'asc')}" onclick="sortItems('${category}', 'quantita', 'asc')">
+                            <i class="fas fa-sort-amount-down"></i> Quantità (Crescente)
+                        </button>
+                        <button class="sort-btn ${getSortClass(category, 'quantita', 'desc')}" onclick="sortItems('${category}', 'quantita', 'desc')">
+                            <i class="fas fa-sort-amount-up"></i> Quantità (Decrescente)
+                        </button>
+                    </div>
+                    <div id="${category}-items"></div>
+                `;
+                
+                container.appendChild(section);
+                renderCategoryItems(category);
+            });
+            
+            // Applica il filtro dopo il rendering
+            filterItems(currentFilter);
+        }
+        
+        function renderCategoryItems(category) {
+            const container = document.getElementById(`${category}-items`);
+            container.innerHTML = '';
+            
+            const originalItems = warehouses[currentWarehouse][category];
+            
+            // Se non ci sono articoli, mostra stato vuoto
+            if (originalItems.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-box-open"></i>
+                        <p>Nessun articolo in questa categoria</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Copia degli articoli per l'ordinamento
+            const itemsToDisplay = [...originalItems];
+            
+            // Applica l'ordinamento se specificato
+            const sortKey = `${currentWarehouse}:${category}`;
+            
+            if (sortState[sortKey]) {
+                const { field, direction } = sortState[sortKey];
+                
+                itemsToDisplay.sort((a, b) => {
+                    if (field === 'quantita') {
+                        return direction === 'asc' ? a.quantita - b.quantita : b.quantita - a.quantita;
+                    } else {
+                        const aVal = a.nome?.toLowerCase() || '';
+                        const bVal = b.nome?.toLowerCase() || '';
+                        return direction === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
+                    }
+                });
+            }
+            
+            // Renderizza ogni articolo
+            itemsToDisplay.forEach(item => {
+                // Controlla se l'articolo ha quantità bassa
+                const isLowStock = item.quantita <= (item.alertThreshold || 5);
+                
+                const itemElement = document.createElement('div');
+                itemElement.className = `item-row ${isLowStock ? 'low-stock' : ''}`;
+                itemElement.innerHTML = `
+                    <div>
+                        <label>
+                            ${isLowStock ? '<i class="fas fa-exclamation-circle alert-icon"></i>' : ''}
+                            <i class="fas fa-tag"></i> Nome Articolo
+                        </label>
+                        <input type="text" value="${item.nome || ''}" 
+                            onchange="updateItem('${category}', '${item.id}', 'nome', this.value)"
+                            placeholder="Nome articolo">
+                    </div>
+                    <div class="${isLowStock ? 'quantity-container' : ''}">
+                        <label><i class="fas fa-box"></i> Quantità</label>
+                        <input type="number" min="0" value="${item.quantita}" 
+                            onchange="updateItem('${category}', '${item.id}', 'quantita', this.value)"
+                            placeholder="Quantità">
+                        
+                        <div class="alert-threshold">
+                            <label><i class="fas fa-bell"></i> Allerta sotto:</label>
+                            <input type="number" min="1" value="${item.alertThreshold || 5}" 
+                                onchange="updateItem('${category}', '${item.id}', 'alertThreshold', this.value)">
+                        </div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-danger" onclick="removeItem('${category}', '${item.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(itemElement);
+            });
+        }
+        
+        // Funzione per ottenere la classe CSS per il pulsante di ordinamento
+        function getSortClass(category, field, direction) {
+            const sortKey = `${currentWarehouse}:${category}`;
+            if (sortState[sortKey] && 
+                sortState[sortKey].field === field && 
+                sortState[sortKey].direction === direction) {
+                return 'active';
+            }
+            return '';
+        }
+        
+        // Funzione per ordinare gli articoli
+        function sortItems(category, field, direction) {
+            const sortKey = `${currentWarehouse}:${category}`;
+            
+            // Se stiamo ordinando già per lo stesso campo, inverti la direzione
+            if (sortState[sortKey] && sortState[sortKey].field === field) {
+                sortState[sortKey].direction = direction;
+            } else {
+                // Altrimenti, imposta il nuovo ordinamento
+                sortState[sortKey] = { field, direction };
+            }
+            
+            renderCategoryItems(category);
+        }
+        
+        function showAddCategoryModal() {
+            const name = prompt("Inserisci il nome della nuova categoria:");
+            if (name && name.trim() !== "") {
+                warehouses[currentWarehouse][name] = [];
+                addHistoryEntry(`Aggiunta nuova categoria: ${name}`);
+                showNotification('Modifica effettuata! Ricorda di salvare');
+                renderCategories();
+            }
+        }
+        
+        function removeCategory(name) {
+            if (confirm(`Eliminare la categoria ${name} e tutti i suoi articoli?`)) {
+                delete warehouses[currentWarehouse][name];
+                addHistoryEntry(`Rimossa categoria: ${name}`);
+                showNotification('Modifica effettuata! Ricorda di salvare');
+                renderCategories();
+            }
+        }
+        
+        // ========== RICERCA E FILTRI ========== //
+        
+        function filterItems(type) {
+            currentFilter = type;
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            
+            Object.keys(warehouses[currentWarehouse]).forEach(category => {
+                const items = document.querySelectorAll(`#${category}-items .item-row`);
+                
+                items.forEach(item => {
+                    const nameInput = item.querySelector('input[type="text"]');
+                    const quantityInput = item.querySelector('input[type="number"]');
+                    const thresholdInput = item.querySelector('.alert-threshold input');
+                    
+                    const name = nameInput ? nameInput.value.toLowerCase() : '';
+                    const quantity = quantityInput ? parseInt(quantityInput.value) : 0;
+                    const threshold = thresholdInput ? parseInt(thresholdInput.value) : 5;
+                    const isLowStock = quantity <= threshold;
+                    
+                    const matchesSearch = name.includes(searchTerm);
+                    const matchesFilter = type === 'all' || (type === 'low' && isLowStock);
+                    
+                    item.style.display = (matchesSearch && matchesFilter) ? 'flex' : 'none';
+                });
+            });
+        }
+        
+        // ========== RIEPILOGO ========== //
+        
+        function updateSummary() {
+            let totalItems = 0;
+            let lowStock = 0;
+            
+            Object.keys(warehouses[currentWarehouse]).forEach(category => {
+                totalItems += warehouses[currentWarehouse][category].length;
+                
+                warehouses[currentWarehouse][category].forEach(item => {
+                    const threshold = item.alertThreshold || 5;
+                    if (item.quantita <= threshold) lowStock++;
+                });
+            });
+            
+            document.getElementById('total-items').textContent = totalItems;
+            document.getElementById('low-stock').textContent = lowStock;
+        }
+        
+        function renderWarehouseTabs() {
+            const tabsContainer = document.getElementById('warehouse-tabs');
+            tabsContainer.innerHTML = '';
+            
+            Object.keys(warehouses).forEach((name, index) => {
+                const tab = document.createElement('button');
+                tab.className = `tab ${name === currentWarehouse ? 'active' : ''}`;
+                tab.setAttribute('data-warehouse', name);
+                tab.innerHTML = `
+                    <i class="fas fa-warehouse"></i> ${name}
+                    <span class="tab-remove" onclick="removeWarehouse('${name}')">
+                        <i class="fas fa-times"></i>
+                    </span>
+                `;
+                tab.onclick = () => switchWarehouse(name);
+                tabsContainer.appendChild(tab);
+            });
+            
+            // Aggiungi tab per il riepilogo
+            const summaryTab = document.createElement('button');
+            summaryTab.className = 'tab';
+            summaryTab.setAttribute('data-tab', 'summary');
+            summaryTab.innerHTML = '<i class="fas fa-clipboard-list"></i> Panoramica';
+            summaryTab.onclick = () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                summaryTab.classList.add('active');
+                document.getElementById('summary-content').classList.add('active');
+                renderWarehouseSummary();
+            };
+            tabsContainer.appendChild(summaryTab);
+        }
+        
+        function renderWarehouseSummary() {
+            const summaryContainer = document.getElementById('warehouse-summary');
+            summaryContainer.innerHTML = '';
+            
+            Object.keys(warehouses).forEach(name => {
+                let totalItems = 0;
+                let lowStock = 0;
+                
+                Object.keys(warehouses[name]).forEach(category => {
+                    totalItems += warehouses[name][category].length;
+                    
+                    warehouses[name][category].forEach(item => {
+                        const threshold = item.alertThreshold || 5;
+                        if (item.quantita <= threshold) lowStock++;
+                    });
+                });
+                
+                const summaryCard = document.createElement('div');
+                summaryCard.className = 'summary-card';
+                summaryCard.innerHTML = `
+                    <button class="remove-warehouse-btn" onclick="removeWarehouse('${name}')">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <h3><i class="fas fa-warehouse"></i> ${name}</h3>
+                    <div class="summary-stats">
+                        <div class="stat-item">
+                            <span class="stat-label"><i class="fas fa-boxes"></i> Totale:</span>
+                            <span class="stat-value">${totalItems}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label"><i class="fas fa-exclamation-triangle"></i> Esaurimento:</span>
+                            <span class="stat-value ${lowStock > 0 ? 'negative' : ''}">${lowStock}</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary manage-btn" onclick="switchWarehouse('${name}')">
+                        <i class="fas fa-edit"></i> Gestisci
+                    </button>
+                `;
+                summaryContainer.appendChild(summaryCard);
+            });
+        }
+        
+        // ========== STORICO MODIFICHE ========== //
+        
+        function addHistoryEntry(action) {
+            history.unshift({
+                action,
+                timestamp: new Date().toLocaleString(),
+                warehouse: currentWarehouse
+            });
+            
+            if (history.length > 10) history = history.slice(0, 10);
+            renderHistory();
+        }
+        
+        function renderHistory() {
+            const list = document.getElementById('history-list');
+            list.innerHTML = history.map(entry => `
+                <li class="history-entry">
+                    <div class="history-timestamp">${entry.timestamp} | ${entry.warehouse}</div>
+                    ${entry.action}
+                </li>
+            `).join('');
+        }
+        
+        function toggleHistory() {
+            const content = document.getElementById('history-content');
+            const chevron = document.getElementById('history-chevron');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                chevron.classList.remove('fa-chevron-down');
+                chevron.classList.add('fa-chevron-up');
+            } else {
+                content.style.display = 'none';
+                chevron.classList.remove('fa-chevron-up');
+                chevron.classList.add('fa-chevron-down');
+            }
+        }
+        
+        // ========== SINCRONIZZAZIONE ========== //
+        
+        function openSyncModal() {
+            document.getElementById('sync-modal').style.display = 'flex';
+            document.getElementById('export-data').value = JSON.stringify(warehouses, null, 2);
+        }
+        
+        function closeSyncModal() {
+            document.getElementById('sync-modal').style.display = 'none';
+        }
+        
+        function copyToClipboard() {
+            const textarea = document.getElementById('export-data');
+            textarea.select();
+            document.execCommand('copy');
+            showNotification('Dati copiati negli appunti!');
+        }
+        
+        function downloadData() {
+            const dataStr = JSON.stringify(warehouses, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = 'dati_magazzino.json';
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showNotification('File scaricato con successo!');
+        }
+        
+        function importFromText() {
+            const data = document.getElementById('import-data').value;
+            try {
+                const newData = JSON.parse(data);
+                
+                if (typeof newData === 'object') {
+                    warehouses = newData;
+                    addHistoryEntry('Importati dati da testo');
+                    showNotification('Dati importati con successo!');
+                    renderWarehouseTabs();
+                    switchWarehouse(Object.keys(warehouses)[0]);
+                    closeSyncModal();
+                } else {
+                    throw new Error('Formato dati non valido');
+                }
+            } catch (error) {
+                showNotification('Errore: ' + error.message, true);
+            }
+        }
+        
+        document.getElementById('import-file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const newData = JSON.parse(e.target.result);
+                    
+                    if (typeof newData === 'object') {
+                        warehouses = newData;
+                        addHistoryEntry('Importati dati da file');
+                        showNotification('Dati importati con successo!');
+                        renderWarehouseTabs();
+                        switchWarehouse(Object.keys(warehouses)[0]);
+                        closeSyncModal();
+                    } else {
+                        throw new Error('Formato file non valido');
+                    }
+                } catch (error) {
+                    showNotification('Errore: ' + error.message, true);
+                }
+            };
+            reader.readAsText(file);
+        });
+        
+        // ========== CONFIGURAZIONE AIRTABLE ========== //
+        
+        function loadAirtableConfig() {
+            const savedConfig = localStorage.getItem('airtableConfig');
+            if (savedConfig) {
+                airtableConfig = JSON.parse(savedConfig);
+                document.getElementById('airtable-api-key').value = airtableConfig.apiKey;
+                document.getElementById('airtable-base-id').value = airtableConfig.baseId;
+                document.getElementById('airtable-table-name').value = airtableConfig.tableName;
+            }
+        }
+        
+        function saveAirtableConfig() {
+            airtableConfig.apiKey = document.getElementById('airtable-api-key').value;
+            airtableConfig.baseId = document.getElementById('airtable-base-id').value;
+            airtableConfig.tableName = document.getElementById('airtable-table-name').value || 'Magazzino';
+            
+            localStorage.setItem('airtableConfig', JSON.stringify(airtableConfig));
+            showNotification('Configurazione Airtable salvata!');
+        }
+        
+        function toggleAirtableConfig() {
+            const configSection = document.getElementById('airtable-config');
+            configSection.style.display = configSection.style.display === 'none' ? 'block' : 'none';
+        }
+        
+        // ========== FUNZIONI AIRTABLE ========== //
+        async function loadFromAirtable() {
+            if (!airtableConfig.apiKey || !airtableConfig.baseId) {
+                showNotification("Configura Airtable prima di caricare i dati!", true);
+                toggleAirtableConfig();
+                return false;
+            }
+            
+            try {
+                const url = `https://api.airtable.com/v0/${airtableConfig.baseId}/${encodeURIComponent(airtableConfig.tableName)}?maxRecords=1&view=Grid%20view`;
+                const response = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${airtableConfig.apiKey}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Errore Airtable: ${response.status} ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                if (data.records && data.records.length > 0) {
+                    warehouses = JSON.parse(data.records[0].fields.data);
+                    showNotification('Dati caricati da Airtable con successo!');
+                    return true;
+                }
+            } catch (error) {
+                showNotification(`Errore durante il caricamento: ${error.message}`, true);
+                console.error('Airtable load error:', error);
+            }
+            return false;
+        }
+        
+        async function saveToAirtable() {
+            if (!airtableConfig.apiKey || !airtableConfig.baseId) {
+                showNotification("Configura Airtable prima di salvare!", true);
+                toggleAirtableConfig();
+                return false;
+            }
+            
+            try {
+                // Carica record esistenti per ottenere ID
+                const url = `https://api.airtable.com/v0/${airtableConfig.baseId}/${encodeURIComponent(airtableConfig.tableName)}?maxRecords=1&view=Grid%20view`;
+                const existingResponse = await fetch(url, {
+                    headers: {
+                        'Authorization': `Bearer ${airtableConfig.apiKey}`
+                    }
+                });
+                
+                if (!existingResponse.ok) {
+                    throw new Error(`Errore nel caricamento dati: ${existingResponse.status} ${existingResponse.statusText}`);
+                }
+                
+                const existingData = await existingResponse.json();
+                const recordId = existingData.records && existingData.records.length > 0 ? existingData.records[0].id : null;
+                
+                // Prepara i dati per il salvataggio
+                const saveData = {
+                    records: [{
+                        id: recordId,
+                        fields: {
+                            'data': JSON.stringify(warehouses),
+                            'last_updated': new Date().toISOString()
+                        }
+                    }]
+                };
+                
+                // Effettua il salvataggio
+                const saveUrl = `https://api.airtable.com/v0/${airtableConfig.baseId}/${encodeURIComponent(airtableConfig.tableName)}`;
+                const saveMethod = recordId ? 'PATCH' : 'POST';
+                
+                const saveResponse = await fetch(saveUrl, {
+                    method: saveMethod,
+                    headers: {
+                        'Authorization': `Bearer ${airtableConfig.apiKey}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(saveData)
+                });
+                
+                if (!saveResponse.ok) {
+                    throw new Error(`Errore salvataggio: ${saveResponse.status} ${saveResponse.statusText}`);
+                }
+                
+                showNotification('Dati salvati su Airtable con successo!');
+                return true;
+            } catch (error) {
+                showNotification(`Errore durante il salvataggio: ${error.message}`, true);
+                console.error('Airtable save error:', error);
+                return false;
+            }
+        }
+        
+        // ========== DARK MODE ========== //
+        
+        function setupTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            let currentTheme = localStorage.getItem('theme') || 'light';
+            
+            applyTheme(currentTheme);
+            
+            themeToggle.onclick = () => {
+                currentTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                applyTheme(currentTheme);
+                localStorage.setItem('theme', currentTheme);
+            };
+        }
+        
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            const themeToggle = document.getElementById('theme-toggle');
+            
+            if (theme === 'dark') {
+                themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+            } else {
+                themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+            }
+        }
+        
+        // ========== UTILITY ========== //
+        
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = isError ? 'notification error' : 'notification';
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function toggleRename() {
+            isRenaming = !isRenaming;
+            const nameSpan = document.getElementById('current-warehouse-name');
+            const input = document.getElementById('warehouse-name-input');
+            const renameBtn = document.getElementById('rename-btn');
+            
+            if (isRenaming) {
+                nameSpan.style.display = 'none';
+                input.style.display = 'inline-block';
+                input.value = currentWarehouse;
+                input.focus();
+                renameBtn.innerHTML = '<i class="fas fa-check"></i> Conferma';
+                renameBtn.onclick = renameWarehouse;
+                
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        renameWarehouse();
+                    }
+                });
+            } else {
+                nameSpan.style.display = 'inline';
+                input.style.display = 'none';
+                renameBtn.innerHTML = '<i class="fas fa-edit"></i> Rinomina';
+                renameBtn.onclick = toggleRename;
+            }
+        }
+        
+        function renameWarehouse() {
+            const newName = document.getElementById('warehouse-name-input').value.trim();
+            if (newName && newName !== currentWarehouse && newName !== "") {
+                warehouses[newName] = warehouses[currentWarehouse];
+                delete warehouses[currentWarehouse];
+                currentWarehouse = newName;
+                addHistoryEntry(`Rinominato magazzino da ${currentWarehouse} a ${newName}`);
+                showNotification('Modifica effettuata! Ricorda di salvare');
+                renderWarehouseTabs();
+                switchWarehouse(newName);
+            }
+            toggleRename();
+        }
+
+        // ========== INIZIALIZZAZIONE ========== //
+        
+        async function init() {
+            loadAirtableConfig();
+            setupTheme();
+            
+            // Prova a caricare da Airtable
+            const loaded = await loadFromAirtable();
+            
+            // Se non carica da Airtable, carica dati locali
+            if (!loaded) {
+                const savedData = localStorage.getItem('warehouseData');
+                if (savedData) {
+                    warehouses = JSON.parse(savedData);
+                    showNotification('Dati caricati da backup locale');
+                } else {
+                    // Dati iniziali vuoti
+                    warehouses = {
+                        "Magazzino 1": {
+                            "cibo": [],
+                            "pulizie": []
+                        }
+                    };
+                }
+            }
+            
+            // Se non c'è un magazzino corrente, usa il primo disponibile
+            if (Object.keys(warehouses).length > 0) {
+                currentWarehouse = Object.keys(warehouses)[0];
+            }
+            
+            renderWarehouseTabs();
+            renderCategories();
+            updateSummary();
+            renderHistory();
+            switchWarehouse(currentWarehouse);
+            
+            document.getElementById('search-input').addEventListener('input', () => filterItems(currentFilter));
+            
+            // Gestione installazione PWA
+            setupPWAInstall();
+        }
+        
+        // ========== GESTIONE INSTALLAZIONE PWA ========== //
+        function setupPWAInstall() {
+            let deferredPrompt;
+            const installBtn = document.getElementById('installBtn');
+            
+            window.addEventListener('beforeinstallprompt', (e) => {
+                // Previeni la visualizzazione automatica del prompt
+                e.preventDefault();
+                // Salva l'evento per mostrarlo più tardi
+                deferredPrompt = e;
+                // Mostra il pulsante di installazione
+                installBtn.style.display = 'block';
+            });
+            
+            installBtn.addEventListener('click', () => {
+                // Nascondi il pulsante
+                installBtn.style.display = 'none';
+                // Mostra il prompt di installazione
+                deferredPrompt.prompt();
+                // Attendi la scelta dell'utente
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('Utente ha accettato l\'installazione');
+                    } else {
+                        console.log('Utente ha rifiutato l\'installazione');
+                    }
+                    deferredPrompt = null;
+                });
+            });
+            
+            window.addEventListener('appinstalled', () => {
+                console.log('App installata con successo');
+                installBtn.style.display = 'none';
+            });
+        }
+        
+        window.onload = init;
+    </script>
+</body>
+</html>
