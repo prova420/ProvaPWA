@@ -800,7 +800,18 @@
                 padding: 10px 15px;
                 font-size: 14px;
             }
-        }
+    /* Aggiungi prima della chiusura </style> */
+@media (hover: none) and (pointer: coarse) {
+  body {
+    touch-action: manipulation;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  button, a {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
     </style>
 </head>
 <body>
