@@ -1826,7 +1826,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
+                navigator.serviceWorker.register('./sw.js') // ✅ Nuovo percorso relativo
                     .then(registration => {
                         console.log('ServiceWorker registrato con successo:', registration.scope);
                     })
