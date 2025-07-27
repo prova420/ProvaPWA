@@ -31,5 +31,6 @@
     }
   ],
   "categories": ["business", "productivity"],
-  "lang": "it-IT"
+  "lang": "it-IT",
+  "prefer_related_applications": false
 }
