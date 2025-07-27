@@ -1,11 +1,13 @@
-const CACHE_NAME = 'magazzino-v4';
+const CACHE_VERSION = 'v8-' + new Date().toISOString().split('T')[0];
+const CACHE_NAME = `magazzino-${CACHE_VERSION}`;
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
   './icona-192.png',
   './icona-512.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+  './css/all.min.css',
+  './webfonts/fa-solid-900.woff2'
 ];
 
 self.addEventListener('install', (event) => {
@@ -31,10 +33,17 @@ self.addEventListener('install', (event) => {
 });
 
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => response || fetch(event.request))
-  );
+  // Gestione speciale per dispositivi mobile
+  if (event.request.url.includes('magazzinoprova.netlify.app') || 
+      event.request.url.startsWith('https://magazzinoprova.netlify.app')) {
+    event.respondWith(
+      caches.match(event.request)
+        .then(response => response || fetch(event.request))
+    );
+  } else {
+    // Per altre richieste, passa direttamente alla rete
+    event.respondWith(fetch(event.request));
+  }
 });
 
 self.addEventListener('activate', (event) => {
@@ -42,7 +51,9 @@ self.addEventListener('activate', (event) => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cache => {
-          if (cache !== CACHE_NAME) return caches.delete(cache);
+          if (cache !== CACHE_NAME && cache.startsWith('magazzino-')) {
+            return caches.delete(cache);
+          }
         })
       );
     })
