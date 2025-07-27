@@ -17,6 +17,13 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#3498db">
     
+    <!-- Meta tag aggiuntivi per PWA -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="application-name" content="Gestione Magazzino">
+    <meta name="msapplication-TileColor" content="#3498db">
+    
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* Tutti i tuoi stili CSS esistenti qui */
@@ -1784,37 +1791,50 @@
             const installBtn = document.getElementById('installBtn');
             
             window.addEventListener('beforeinstallprompt', (e) => {
-                // Previeni la visualizzazione automatica del prompt
                 e.preventDefault();
-                // Salva l'evento per mostrarlo più tardi
                 deferredPrompt = e;
-                // Mostra il pulsante di installazione
                 installBtn.style.display = 'block';
-            });
-            
-            installBtn.addEventListener('click', () => {
-                // Nascondi il pulsante
-                installBtn.style.display = 'none';
-                // Mostra il prompt di installazione
-                deferredPrompt.prompt();
-                // Attendi la scelta dell'utente
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Utente ha accettato l\'installazione');
-                    } else {
-                        console.log('Utente ha rifiutato l\'installazione');
-                    }
-                    deferredPrompt = null;
+                
+                installBtn.addEventListener('click', () => {
+                    installBtn.style.display = 'none';
+                    deferredPrompt.prompt();
+                    
+                    deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('Installazione accettata');
+                            showNotification('App installata con successo!');
+                        } else {
+                            console.log('Installazione rifiutata');
+                            showNotification('Installazione annullata', true);
+                        }
+                        deferredPrompt = null;
+                    });
                 });
             });
             
             window.addEventListener('appinstalled', () => {
-                console.log('App installata con successo');
                 installBtn.style.display = 'none';
+                console.log('App installata');
+                showNotification('App installata con successo!');
             });
         }
         
         window.onload = init;
+    </script>
+
+    <!-- Registrazione Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registrato con successo:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Registrazione ServiceWorker fallita:', error);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
