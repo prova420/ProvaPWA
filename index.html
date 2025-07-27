@@ -1847,6 +1847,23 @@
                     });
             });
         }
-    </script>
+    <script>
+// Rileva dispositivi mobili reali
+if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+  console.log('Dispositivo mobile rilevato');
+  document.documentElement.classList.add('mobile-device');
+  
+  // Forza il ridimensionamento iniziale
+  const resizeViewport = () => {
+    let viewport = document.querySelector('meta[name="viewport"]');
+    if(viewport) {
+      viewport.content = viewport.content.replace(/initial-scale=[^,]+/, 'initial-scale=1.0');
+    }
+  };
+  
+  window.addEventListener('resize', resizeViewport);
+  resizeViewport();
+}
+</script>
 </body>
 </html>
