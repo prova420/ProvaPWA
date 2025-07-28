@@ -1,0 +1,21 @@
+{
+  "name": "Gestione Magazzino",
+  "short_name": "Magazzino",
+  "description": "Applicazione per la gestione avanzata del magazzino",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#2c3e50",
+  "theme_color": "#3498db",
+  "icons": [
+    {
+      "src": "icona-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "icona-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ]
+}
